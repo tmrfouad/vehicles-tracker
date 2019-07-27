@@ -3,8 +3,13 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using VehiclesTracker.Business.Managers;
+using VehiclesTracker.Data;
+using VehiclesTracker.Data.Core;
+using VehiclesTracker.SignalRHubs;
 
 namespace VehiclesTracker
 {
@@ -20,7 +25,26 @@ namespace VehiclesTracker
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddMvc().SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
+            // ===== DbContext ========
+            var connection = Configuration.GetConnectionString("VehiclesTrackerDatabase");
+            services.AddEntityFrameworkSqlServer()
+                .AddDbContext<VehiclesTrackerDBContext>(opt => opt.UseSqlServer(connection));
+
+            // Unit Of Work
+            services.AddScoped<IUnitOfWork, UnitOfWork>();
+
+            // Managers
+            services.AddScoped<CustomerManager>();
+            services.AddScoped<VehicleManager>();
+
+            // SignalR
+            services.AddSignalR();
+
+            // MVC
+            services.AddMvc()
+                .AddJsonOptions(options =>
+                    options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore)
+                .SetCompatibilityVersion(CompatibilityVersion.Version_2_2);
 
             // In production, the Angular files will be served from this directory
             services.AddSpaStaticFiles(configuration =>
@@ -47,8 +71,16 @@ namespace VehiclesTracker
             app.UseStaticFiles();
             app.UseSpaStaticFiles();
 
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<VehiclesHub>("/vehicles");
+            });
+
             app.UseMvc(routes =>
             {
+                routes.MapRoute(
+                    name: "apiDefault",
+                    template: "{controller}/{action=Get}/{id?}");
                 routes.MapRoute(
                     name: "default",
                     template: "{controller}/{action=Index}/{id?}");

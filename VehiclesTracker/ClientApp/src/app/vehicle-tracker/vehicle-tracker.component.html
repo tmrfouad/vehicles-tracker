@@ -1,0 +1,50 @@
+<p *ngIf="!vehicles"><em>Loading...</em></p>
+<div *ngIf="vehicles">
+  <div class="form-group">
+    <label for="customers-select">Customer :</label>
+    <select
+      class="form-control"
+      id="customers-select"
+      [(ngModel)]="customerFilter"
+      (change)="filterVehicles()"
+    >
+      <option value=""></option>
+      <option *ngFor="let customer of customers" [value]="customer.id"
+        >{{ customer.name }} - {{ customer.address }}</option
+      >
+    </select>
+    <label for="customers-select">Status :</label>
+    <select
+      class="form-control"
+      id="customers-select"
+      [(ngModel)]="statusFilter"
+      (change)="filterVehicles()"
+    >
+      <option value=""></option>
+      <option value="1">On</option>
+      <option value="0">Off</option>
+    </select>
+  </div>
+  <table class="table table-striped">
+    <tr>
+      <th>Vehicle</th>
+      <th>Status</th>
+    </tr>
+    <tr *ngFor="let vehicle of filteredVehicles">
+      <td>
+        {{ vehicle.vehicleId }} - {{ vehicle.regNo }}
+      </td>
+      <td>
+        <div
+          class="badge"
+          [ngClass]="{
+            'badge-success': vehicle.on,
+            'badge-danger': !vehicle.on
+          }"
+        >
+          {{ vehicle.on ? "On" : "Off" }}
+        </div>
+      </td>
+    </tr>
+  </table>
+</div>
