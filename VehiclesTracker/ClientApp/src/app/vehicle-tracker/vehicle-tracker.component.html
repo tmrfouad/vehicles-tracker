@@ -8,7 +8,7 @@
       [(ngModel)]="customerFilter"
       (change)="filterVehicles()"
     >
-      <option value=""></option>
+      <option value="">All</option>
       <option *ngFor="let customer of customers" [value]="customer.id"
         >{{ customer.name }} - {{ customer.address }}</option
       >
@@ -20,7 +20,7 @@
       [(ngModel)]="statusFilter"
       (change)="filterVehicles()"
     >
-      <option value=""></option>
+      <option value="">All</option>
       <option value="1">On</option>
       <option value="0">Off</option>
     </select>
