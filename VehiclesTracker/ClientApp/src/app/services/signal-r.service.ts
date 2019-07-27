@@ -26,6 +26,13 @@ export class SignalRService {
       .catch(err => console.log(`Error while starting connection: ${err}`));
   };
 
+  public stopConnection = () => {
+    return this.hubConnection
+      .stop()
+      .then(() => console.log("Connection Stopped"))
+      .catch(err => console.log(`Error while starting connection: ${err}`));
+  };
+
   public addTransferVehiclesDataListener = callback =>
     this.hubConnection.on("transfervehiclesdata", data => {
       this.data = data;
